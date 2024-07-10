@@ -1,0 +1,77 @@
+# Python
+*.py[cod]
+__pycache__/
+*.so
+
+# Django
+*.log
+*.pot
+*.pyc
+db.sqlite3
+db.sqlite3-journal
+media
+
+# Secret key
+secret_key.txt
+
+# Static files
+/static/
+
+# Virtual environment
+venv/
+env/
+.env
+
+# IDE specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Django migrations
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# Firebase
+fb-test-e3fe6-firebase-adminsdk-6o4tc-384490677f.json
+
+# Local settings
+local_settings.py
+
+# Backup files
+*.bak
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# Pytest
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
