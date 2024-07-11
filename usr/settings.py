@@ -27,8 +27,14 @@ SECRET_KEY = 'django-insecure-ky&t_3rvv^04yo*)3-tu9%v9gy&6_67p14oct#7#3xjhy0dv5y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = [
+    'http://127.0.0.1:8000',
+    'http://localhost:8000',
+    'http://127.0.0.1:3000',
+    'http://localhost:3000',
+    'localhost',
+]
+CORS_ORIGIN_ALLOW_ALL = True
 
 # Application definition
 
@@ -42,7 +48,8 @@ INSTALLED_APPS = [
     'local',
     'community',
     'rest_framework',
-    'firebase_admin'
+    'firebase_admin',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
@@ -53,6 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'usr.urls'

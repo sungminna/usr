@@ -6,7 +6,6 @@ from django.contrib.auth.models import User
 class FirebaseToken(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     firebase_uid = models.CharField(max_length=255, unique=True)
-    token = models.CharField(max_length=255)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

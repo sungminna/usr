@@ -6,7 +6,7 @@ from rest_framework import viewsets
 from rest_framework.permissions import AllowAny
 
 from .models import FirebaseToken
-from .serializers import FirebaseTokenCreateSerializer, FirebaseTokenUpdateSerializer, FirebaseTokenDeleteSerializer
+from .serializers import FirebaseTokenSerializer
 from firebase_admin import auth
 from django.contrib.auth.models import User
 from .authentication import FirebaseAuthentication
@@ -21,26 +21,26 @@ class FirebaseTokenView(APIView):
 
 
     def post(self, request):
+        print(request.data)
         token = request.data.get('token')
         if not token:
             return Response({'message': 'Token is missing'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             decoded_token = auth.verify_id_token(token)
-            firebase_uid = decoded_token['uid']
-            email = decoded_token['email']
-
-            user, created = User.objects.get_or_create(username=firebase_uid, email=email)
-
+            firebase_uid = decoded_token.get('uid')
+            email = decoded_token.get('email')
+            username = request.data.get('username')
+            user, created = User.objects.get_or_create(username=username, email=email)
             if created:
                 user.set_unusable_password()
                 user.save()
-
             data = {
-                'user': user,
+                'user': user.pk,
                 'firebase_uid': firebase_uid,
-                'token': token,
+                'is_active': True,
             }
-            serializer = FirebaseTokenCreateSerializer(data=data, context={'request': request})
+            serializer = FirebaseTokenSerializer(data=data)
+            print(serializer)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -56,14 +56,17 @@ class FirebaseTokenView(APIView):
             return Response({'message': 'Token is missing'}, status=status.HTTP_400_BAD_REQUEST)
         try:
             decoded_token = auth.verify_id_token(token)
-            firebase_uid = decoded_token['uid']
-            fb_token = FirebaseToken.objects.get(firebase_uid=firebase_uid)
+            firebase_uid = decoded_token.get('uid')
+            username = request.data.get('username')
+            email = decoded_token.get('email')
+            user, created = User.objects.get_or_create(username=username, email=email)
+
             data = {
+                'user': user.pk,
                 'firebase_uid': firebase_uid,
-                'token': token,
                 'is_active': True,
             }
-            serializer = FirebaseTokenUpdateSerializer(token=fb_token, data=data, partial=True, context={'request': request})
+            serializer = FirebaseTokenSerializer(data=data, partial=True, context={'request': request})
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -75,9 +78,11 @@ class FirebaseTokenView(APIView):
     def delete(self, request):
         try:
             token = request.data.get('token')
+            decoded_token = auth.verify_id_token(token)
+            firebase_uid = decoded_token.get('uid')
             if not token:
                 return Response({'message': 'Token is missing'}, status=status.HTTP_400_BAD_REQUEST)
-            fb_token = FirebaseToken.objects.get(token=token)
+            fb_token = FirebaseToken.objects.get(firebase_uid=firebase_uid)
             if fb_token:
                 fb_token.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
@@ -85,5 +90,4 @@ class FirebaseTokenView(APIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 

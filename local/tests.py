@@ -11,39 +11,39 @@ class FirebaseTokenViewTestCase(APITestCase):
     @classmethod
     def setUp(cls):
         cls.user = User.objects.create(username='testuser', email='testuser@email.com', password='password123')
-        cls.firebase_uid = '5X8umdTlIIe5Rk1Z13sLu4X8iWm2'
-        cls.token_str = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjU2OTFhMTk1YjI0MjVlMmFlZDYwNjMzZDdjYjE5MDU0MTU2Yjk3N2QiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmItdGVzdC1lM2ZlNiIsImF1ZCI6ImZiLXRlc3QtZTNmZTYiLCJhdXRoX3RpbWUiOjE3MjA2NzcyMjQsInVzZXJfaWQiOiI1WDh1bWRUbElJZTVSazFaMTNzTHU0WDhpV20yIiwic3ViIjoiNVg4dW1kVGxJSWU1UmsxWjEzc0x1NFg4aVdtMiIsImlhdCI6MTcyMDY3NzIyNCwiZXhwIjoxNzIwNjgwODI0LCJlbWFpbCI6InRlc3R1c2VyQGVtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJ0ZXN0dXNlckBlbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.SmQmuknTpit5zDCvY74SPszHkdTdgtPartsZvhvBWVg5PP3dW5houllo9ZlV4TApRDI0jyVzwXAuRfp-pSJIsaZrwbjct7WjWaxclvyzz7JPVg6mBM3aKc3WVgvZmefBV1iQveijQx6xSCtjKMcrst3xsDhsWVyiqykuNYTVhmVYbnHe6lMdk3yGyb69sR5ufbqje03eSasnydYSocNLAb0NBPoBfWuoxHF_ejwGtE2EBhcfxG1hVMPOOCnmTZlbkTKkTor8LYYwN2jIDejFpm4U_XXMISQn_jZTEGWTQjGkqDhlHckVZGyr8MB3nemCmgeRVTkW_2kUo3yNia0Oig'
+        cls.username = 'testuser'
+        cls.email = 'testuser@email.com'
+        cls.firebase_uid = "5X8umdTlIIe5Rk1Z13sLu4X8iWm2"
+        cls.token_str = "eyJhbGciOiJSUzI1NiIsImtpZCI6IjU2OTFhMTk1YjI0MjVlMmFlZDYwNjMzZDdjYjE5MDU0MTU2Yjk3N2QiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL3NlY3VyZXRva2VuLmdvb2dsZS5jb20vZmItdGVzdC1lM2ZlNiIsImF1ZCI6ImZiLXRlc3QtZTNmZTYiLCJhdXRoX3RpbWUiOjE3MjA2OTg0MTUsInVzZXJfaWQiOiI1WDh1bWRUbElJZTVSazFaMTNzTHU0WDhpV20yIiwic3ViIjoiNVg4dW1kVGxJSWU1UmsxWjEzc0x1NFg4aVdtMiIsImlhdCI6MTcyMDY5ODQxNSwiZXhwIjoxNzIwNzAyMDE1LCJlbWFpbCI6InRlc3R1c2VyQGVtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiZmlyZWJhc2UiOnsiaWRlbnRpdGllcyI6eyJlbWFpbCI6WyJ0ZXN0dXNlckBlbWFpbC5jb20iXX0sInNpZ25faW5fcHJvdmlkZXIiOiJwYXNzd29yZCJ9fQ.Ra--6vSybAq6ZaXGkwWWV839TZvnM15eS06go5CloOKO8Vaq2TR-kjgf1FUwSNp_3iDLONavMfYQD4qTwZxxQFH8X10Gomt1Gx6LAQ7TilgY0KCcY29hh6SFnBiiFhIkVD76Tqdq-qmGVoowc5KtQoJv6UZ3X8FOq2AI40oQDW6U_9FQQdIDHmp8Y9YWfMKbnAQPI1e8LJuGNitCdcm2GabzfQ17oe2LckFeQ-uoBgmufNS3rFcHpW6wSi900rTATStB61nliGhuhzMG0RrUDJyXiyVGKeTP1XbrgV6SxxOrGDkzjpPHltJV1JMV_vgOFGmda5Av0JL7v3bQyDdFsw"
+        # need to update token_str
 
-        cls.token = FirebaseToken.objects.create(
-            user=cls.user,
-            firebase_uid=cls.firebase_uid,
-            token=cls.token_str
-        )
-
-    def post_valid_token(self):
+    def test_post_valid_token(self):
         url = reverse('firebase-token-list')
-        data = {'token': self.token_str}
+        data = {'token': self.token_str, 'username': self.username}
         #self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
         self.client.force_authenticate(user=self.user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('token', response.data)
-        self.assertEqual(response.data['token'], self.token_str)
+        self.assertEqual(response.data['id'], self.user.pk)
+        self.assertEqual(response.data['firebase_uid'], self.firebase_uid)
+        self.assertEqual(response.data['is_active'], True)
 
 
     def test_update_valid_token(self):
         url = reverse('firebase-token-list')
-        data = {'token': self.token_str}
+        data = {'token': self.token_str, 'username': self.username}
         #self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
         self.client.force_authenticate(user=self.user)
         response = self.client.put(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertIn('token', response.data)
-        self.assertEqual(response.data['token'], self.token_str)
+        self.assertEqual(response.data['id'], self.user.pk)
+        self.assertEqual(response.data['firebase_uid'], self.firebase_uid)
+        self.assertEqual(response.data['is_active'], True)
 
     def test_delete_valid_token(self):
         url = reverse('firebase-token-list')
-        data = {'token': self.token_str}
+        data = {'token': self.token_str, 'username': self.username}
+        response = self.client.post(url, data, format='json')
         #self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(url, data, format='json')
