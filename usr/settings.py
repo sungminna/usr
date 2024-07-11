@@ -133,7 +133,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 cred = credentials.Certificate('fb-test-e3fe6-firebase-adminsdk-6o4tc-384490677f.json')
 firebase_admin.initialize_app(cred)
 
-AUTH_USER_MODEL = 'local.User'
+#AUTH_USER_MODEL = 'local.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES':
@@ -143,6 +143,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        #'local.authentication.FirebaseAuthentication',
+        'local.authentication.FirebaseAuthentication',
     ],
 }
