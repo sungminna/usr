@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -8,8 +7,9 @@ from rest_framework.permissions import AllowAny
 from .models import FirebaseToken
 from .serializers import FirebaseTokenSerializer
 from firebase_admin import auth
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from .authentication import FirebaseAuthentication
+
 # Create your views here.
 
 class FirebaseTokenView(APIView):
@@ -41,7 +41,11 @@ class FirebaseTokenView(APIView):
             'is_active': True,
         }
         context = {'request': request} if request else {}
-        serializer = FirebaseTokenSerializer(data=data, partial=True, context=context)
+        token = FirebaseToken.objects.filter(firebase_uid=firebase_uid).first()
+        if token:
+            serializer = FirebaseTokenSerializer(token, data=data, partial=True, context=context)
+        else:
+            serializer = FirebaseTokenSerializer(data=data, partial=True, context=context)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
