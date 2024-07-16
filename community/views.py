@@ -4,6 +4,8 @@ from rest_framework import viewsets
 from .models import Forum, Topic, Post, Comment
 from .serializers import ForumSerializer, TopicSerializer, PostSerializer, CommentSerializer
 
+from django_filters.rest_framework import DjangoFilterBackend
+
 # Create your views here.
 
 class ForumViewSet(viewsets.ModelViewSet):
@@ -17,6 +19,8 @@ class TopicViewSet(viewsets.ModelViewSet):
     permission_classes = []
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['forum_id']
 
 class PostViewSet(viewsets.ModelViewSet):
     authentication_classes = []

@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'community',
     'rest_framework',
     'firebase_admin',
-    'corsheaders'
+    'corsheaders',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -153,4 +154,5 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'local.authentication.FirebaseAuthentication',
     ],
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
