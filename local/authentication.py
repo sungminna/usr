@@ -12,10 +12,14 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
             if not auth_header:
                 return None
             token = auth_header.split(' ').pop()
+            if token == 'undefined' or None:
+                #server component returns 'undefined' string as token
+                #subject to change by frontend code
+                return None
             decoded_token = auth.verify_id_token(token)
             firebase_uid = decoded_token['uid']
             token = FirebaseToken.objects.select_related('user').get(firebase_uid=firebase_uid)
             user = token.user
-            return user, None
+            return user, token
         except auth.InvalidIdTokenError:
             raise exceptions.AuthenticationFailed('Invalid Firebase ID Token')

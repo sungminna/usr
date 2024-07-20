@@ -25,14 +25,17 @@ class TopicSerializer(serializers.HyperlinkedModelSerializer):
 
 class PostSerializer(serializers.HyperlinkedModelSerializer):
     topic = serializers.PrimaryKeyRelatedField(queryset=Topic.objects.all())
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    username = serializers.ReadOnlyField(source='author.username')
     class Meta:
         model = Post
-        fields = ('id', 'content', 'created_at', 'author', 'topic')
+        fields = ('id', 'content', 'created_at', 'author', 'topic', 'username')
 class CommentSerializer(serializers.HyperlinkedModelSerializer):
     post = serializers.PrimaryKeyRelatedField(queryset=Post.objects.all())
-    author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    author = serializers.PrimaryKeyRelatedField(read_only=True)
+    username = serializers.ReadOnlyField(source='author.username')
+
     class Meta:
         model = Comment
-        fields = ('id', 'content', 'created_at', 'author', 'post')
+        fields = ('id', 'content', 'created_at', 'author', 'post', 'username')
 

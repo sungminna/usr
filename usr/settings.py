@@ -145,14 +145,15 @@ firebase_admin.initialize_app(cred)
 #AUTH_USER_MODEL = 'local.User'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES':
-    [
-        'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.IsAdminUser',
-        'rest_framework.permissions.AllowAny',
-    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'local.authentication.FirebaseAuthentication',
     ],
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
+    'DEFAULT_PERMISSION_CLASSES':
+    [
+        'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_FILTER_BACKENDS':
+    [
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
 }
