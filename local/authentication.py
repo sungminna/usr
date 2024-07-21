@@ -12,7 +12,7 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
             if not auth_header:
                 return None
             token = auth_header.split(' ').pop()
-            if token == 'undefined' or None:
+            if token == 'undefined':
                 #server component returns 'undefined' string as token
                 #subject to change by frontend code
                 return None
