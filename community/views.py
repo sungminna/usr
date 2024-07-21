@@ -1,3 +1,4 @@
+
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.views import APIView
@@ -5,11 +6,14 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from .models import Forum, Topic, Post, Comment, User
-from .serializers import ForumSerializer, TopicSerializer, PostSerializer, CommentSerializer, UserSerializer
+from django.contrib.auth.models import Group
+
+from .serializers import ForumSerializer, TopicSerializer, PostSerializer, CommentSerializer, UserSerializer, \
+    GroupSerializer
 
 from django_filters.rest_framework import DjangoFilterBackend
 from local.authentication import FirebaseAuthentication
-from local.permissions import isAuthorOrReadOnly, IsFirebaseAuthenticated
+from local.permissions import IsAuthorOrReadOnly, IsPostAuthorOrCommentAuthor
 
 # Create your views here.
 
@@ -28,6 +32,42 @@ class UserViewSet(viewsets.ViewSet):
                 }
         return Response(data, status=status.HTTP_200_OK)
 
+    @action(detail=False, methods=['GET'])
+    def groups(self, request, *args, **kwargs):
+        user = request.user
+        try:
+            groups = user.groups.all()
+            serializer = GroupSerializer(groups, many=True)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(data={'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['PATCH'])
+    def join_group(self, request, *args, **kwargs):
+        user = request.user
+        group_id = request.data['group_id']
+        try:
+            user.groups.add(group_id)
+            return Response('User joined group', status=status.HTTP_200_OK)
+        except:
+            return Response('Can not join Group', status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['PATCH'])
+    def leave_group(self, request, *args, **kwargs):
+        user = request.user
+        group_id = request.data['group_id']
+        try:
+            user.groups.remove(group_id)
+            return Response('User left group', status=status.HTTP_200_OK)
+
+        except:
+            return Response('Can not leave Group', status=status.HTTP_400_BAD_REQUEST)
+class GroupViewSet(viewsets.ModelViewSet):
+    authentication_classes = []
+    permission_classes = []
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+
 class ForumViewSet(viewsets.ModelViewSet):
     authentication_classes = []
     permission_classes = []
@@ -44,7 +84,7 @@ class TopicViewSet(viewsets.ModelViewSet):
 
 class PostViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly, isAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend]
@@ -55,7 +95,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly, isAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]  # IsPostAuthorOrCommentAuthor
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     filter_backends = [DjangoFilterBackend]

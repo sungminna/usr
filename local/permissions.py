@@ -3,11 +3,18 @@ import base64
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission, SAFE_METHODS
 from firebase_admin import auth
-class isAuthorOrReadOnly(BasePermission):
+class IsAuthorOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:
             return True
         return obj.author == request.user
+
+class IsPostAuthorOrCommentAuthor(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        return request.user == obj.post.author or request.user == obj.author
+
 
 class IsFirebaseAuthenticated(BasePermission):
     def has_permission(self, request, view):
