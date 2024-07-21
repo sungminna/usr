@@ -7,11 +7,17 @@ class Forum(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
 
+    class Meta:
+        ordering = ['-id']
+
 class Topic(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-id']
 
 class Post(models.Model):
     content = models.TextField()
@@ -19,8 +25,14 @@ class Post(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ['-id']
+
 class Comment(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
+
+    class Meta:
+        ordering = ['-id']

@@ -15,7 +15,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from local.authentication import FirebaseAuthentication
 from local.permissions import IsAuthorOrReadOnly, IsPostAuthorOrCommentAuthor
 
+from rest_framework.pagination import PageNumberPagination
+
+
 # Create your views here.
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class UserViewSet(viewsets.ViewSet):
     authentication_classes = [FirebaseAuthentication]
@@ -89,6 +97,7 @@ class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['topic_id']
+    pagination_class = StandardResultsSetPagination
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -100,5 +109,7 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['post_id']
+    pagination_class = StandardResultsSetPagination
+
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
