@@ -5,10 +5,11 @@ from chat.models import ChatRoom, Chat, Message
 
 class ChatRoomSerializer(serializers.HyperlinkedModelSerializer):
     owner = serializers.PrimaryKeyRelatedField(read_only=True)
+    owner_name = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = ChatRoom
-        fields = ('id', 'room_name', 'owner', 'timestamp')
-        read_only_fields = ('id', 'owner', 'timestamp')
+        fields = ('id', 'room_name', 'owner', 'owner_name', 'timestamp')
+        read_only_fields = ('id', 'owner', 'owner_name', 'timestamp')
 
 class ChatSerializer(serializers.HyperlinkedModelSerializer):
     chatroom = serializers.PrimaryKeyRelatedField(read_only=True)
