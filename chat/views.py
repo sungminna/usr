@@ -16,11 +16,18 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     queryset = ChatRoom.objects.all()
     serializer_class = ChatRoomSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 class ChatViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
     permission_classes = [IsAuthenticated, IsParticipantOrReadOnly]
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
+
+    def perform_create(self, serializer):
+        chatroom = ChatRoom.objects.get(id=self.request.data['chatroom'])
+        serializer.save(participant=self.request.user, chatroom=chatroom)
 
 class MessageViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
@@ -28,3 +35,5 @@ class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(sender=self.request.user)

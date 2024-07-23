@@ -1,7 +1,9 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from chat.models import ChatRoom, Chat, Message
-from django.contrib.auth.models import User
+from chat.serializers import MessageSerializer
+
+
 class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
         try:
@@ -14,43 +16,47 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             if not self.scope.get('user') or self.scope.get('user').is_anonymous:
                 await self.close()
                 return
-            user_id = self.scope.get('user').id
+            self.user = self.scope.get('user')
 
             if not await self.check_room_exists(self.room_id):
                 raise ValueError(f'Room {self.room_id} does not exist')
 
-            if not await self.check_chat_participants(user_id=user_id, room_id=self.room_id):
-                raise ValueError(f'User {user_id} is not a chat participant in room {self.room_id}')
+            if not await self.check_chat_participants(user_id=self.user.id, room_id=self.room_id):
+                raise ValueError(f'User {self.user.id} is not a chat participant in room {self.room_id}')
 
-            group_name = self.get_group_name(self.room_id)
-            await self.channel_layer.group_add(group_name, self.channel_name)
+            self.group_name = self.get_group_name(self.room_id)
+            await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
         except Exception as e:
             await self.send_json({'error': str(e)})
             await self.close()
 
-
     async def disconnect(self, close_code):
         try:
-            group_name = self.get_group_name(self.room_id)
-            await self.channel_layer.group_discard(group_name, self.channel_name)
+            if hasattr(self, 'group_name'):
+                await self.channel_layer.group_discard(self.group_name, self.channel_name)
         except Exception as e:
             pass
 
     async def receive_json(self, content, **kwargs):
         try:
-            text = content['text']
-            user_id = self.scope['user'].id
-            room_id = content['room_id']
-
-            chat = await self.get_chat(user_id=user_id, room_id=room_id)
-            group_name = self.get_group_name(room_id)
-            await self.save_message(text=text, chat=chat)
-            await self.channel_layer.group_send(group_name, {
-                'type': 'chat_message',
-                'text': text,
-                'user_id': user_id,
-            })
+            message_type = content.get('type')
+            if message_type == 'chat_message':
+                text = content['text']
+                room_id = content['room_id']
+                if text:
+                    chat = await self.get_chat(user_id=self.user.id, room_id=room_id)
+                    saved_message = await self.save_message(text=text, chat=chat)
+                    if saved_message:
+                        await self.channel_layer.group_send(self.group_name, {
+                            'type': 'chat_message',
+                            'text': saved_message['text'],
+                            'user_id': self.user.id,
+                            'username': self.user.username,
+                            'timestamp': saved_message['timestamp'],
+                        })
+        except KeyError as e:
+            await self.send_json({'error': f'Missing required field: {str(e)}'})
         except Exception as e:
             await self.send_json({'error': str(e)})
 
@@ -58,7 +64,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         try:
             text = event['text']
             user_id = event['user_id']
-            await self.send_json({'text': text, 'user_id': user_id})
+            username = event['username']
+            timestamp = event['timestamp']
+            await self.send_json({'text': text, 'user_id': user_id, 'username': username, 'timestamp': timestamp})
         except Exception as e:
             await self.send_json({'error': str(e)})
 
@@ -67,38 +75,24 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         return f'chat_room_{room_id}'
 
     @database_sync_to_async
-    def create_chatroom(self, room_name):
-        chatroom = ChatRoom.objects.create(room_name=room_name)
-        return chatroom
-
-    @database_sync_to_async
-    def get_chatroom(self, room_id):
-        chatroom = ChatRoom.objects.get(id=room_id)
-        return chatroom
-
-    @database_sync_to_async
-    def get_or_create_chatroom(self, room_name):
-        chatroom = ChatRoom.objects.get_or_create(room_name=room_name)
-        return chatroom
-
-    @database_sync_to_async
     def get_chat(self, user_id, room_id):
-        user = User.objects.get(id=user_id)
-        chatroom = ChatRoom.objects.filter(id=room_id).first()
-        chat = Chat.objects.filter(user=user, room=chatroom).first()
+        chat = Chat.objects.filter(user_id=user_id, room_id=room_id).first()
         return chat
 
-    @database_sync_to_async
-    def get_or_create_chat(self, user_id, room_id):
-        user = User.objects.get(id=user_id)
-        chat, created = Chat.objects.get_or_create(user=user, room=room_id)
-        return chat
 
     @database_sync_to_async
     def save_message(self, text, chat):
         if not chat:
             raise ValueError(f'Chat {chat} does not exist')
-        Message.objects.create(text=text, chat=chat)
+        serializer = MessageSerializer(data={'text': text, 'chat': chat.id})
+        if serializer.is_valid():
+            saved_message = serializer.save()
+            return {
+                'id': saved_message.id,
+                'text': saved_message.text,
+                'timestamp': saved_message.timestamp.isoformat(),
+            }
+        return None
 
     @database_sync_to_async
     def check_room_exists(self, room_id):
