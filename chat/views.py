@@ -36,4 +36,10 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializer
 
     def perform_create(self, serializer):
-        serializer.save(sender=self.request.user)
+        try:
+            chat_id = self.request.data.get('chat_id')
+            chat = Chat.objects.get(id=chat_id)
+            if chat.participant == self.request.user or chat.chatroom.owner == self.request.user:
+                serializer.save(chat=chat, sender=self.request.user)
+        except Chat.DoesNotExist:
+            pass

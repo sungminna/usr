@@ -40,17 +40,16 @@ class IsFirebaseAuthenticated(BasePermission):
 
 class IsParticipant(BasePermission):
     def has_permission(self, request, view):
-        if request.method != 'GET':
-            # if not GET return True to handle object perm
-            return True
-        chat_id = request.query_params.get('chat_id')
-        if not chat_id:
-            return False
-        try:
-            chat = Chat.objects.filter(id=chat_id).first()
-        except Chat.DoesNotExist:
-            return False
-        return request.user == chat.participant
+        if request.method in ['GET', 'POST']:
+            chat_id = request.query_params.get('chat_id') or request.data.get("chat_id")
+            if not chat_id:
+                return False
+            try:
+                chat = Chat.objects.get(id=chat_id)
+                return chat.participant == request.user or chat.chatroom.owner == request.user
+            except Chat.DoesNotExist:
+                return False
+        return True
 
 
 class IsOwnerOrReadOnly(BasePermission):
