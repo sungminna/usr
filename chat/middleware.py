@@ -37,4 +37,4 @@ class TokenAuthMiddleware(BaseMiddleware):
         except auth.InvalidIdTokenError:
             return None
         except Exception as e:
-            return NOne
+            return None
