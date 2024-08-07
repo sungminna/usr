@@ -30,7 +30,6 @@ class MessageSerializer(serializers.HyperlinkedModelSerializer):
 
     def create(self, validated_data):
         validated_data['sender'] = self.context['request'].get('user')
-        print(validated_data)
         return super().create(validated_data)
 
     def get_sender_name(self, obj):

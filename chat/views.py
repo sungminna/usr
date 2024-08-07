@@ -84,8 +84,7 @@ class MessageViewSet(viewsets.ModelViewSet):
             chat = Chat.objects.filter(chatroom=room, participant=request.user).first()
             if not chat:
                 return Response({'error': 'You are not a participant in this chat room'}, status=status.HTTP_403_FORBIDDEN)
-            messages = self.queryset.filter(chat=chat).order_by('-timestamp')
-
+            messages = self.queryset.filter(chat__chatroom=room).order_by('-timestamp')
             page = self.paginate_queryset(messages)
             if page is not None:
                 serializer = MessageSerializer(page, many=True)
