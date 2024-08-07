@@ -12,7 +12,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 self.room_id = self.scope['path'].split('/')[2]
             else:
                 self.room_id = self.scope['url_route']['kwargs']['room_id']
-
             if not self.scope.get('user') or self.scope.get('user').is_anonymous:
                 await self.close()
                 return
@@ -23,7 +22,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
             if not await self.check_chat_participants(user_id=self.user.id, room_id=self.room_id):
                 raise ValueError(f'User {self.user.id} is not a chat participant in room {self.room_id}')
-
             self.group_name = self.get_group_name(self.room_id)
             await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
@@ -48,11 +46,14 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     chat = await self.get_chat(user_id=self.user.id, room_id=room_id)
                     saved_message = await self.save_message(text=text, chat=chat)
                     if saved_message:
+                        print(saved_message)
                         await self.channel_layer.group_send(self.group_name, {
                             'type': 'chat_message',
+                            'id': saved_message['id'],
                             'text': saved_message['text'],
-                            'user_id': self.user.id,
-                            'username': self.user.username,
+                            'sender': saved_message['sender'],
+                            'chat': saved_message['chat'],
+                            'sender_name': saved_message['sender_name'],
                             'timestamp': saved_message['timestamp'],
                         })
         except KeyError as e:
@@ -63,10 +64,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def chat_message(self, event):
         try:
             text = event['text']
-            user_id = event['user_id']
-            username = event['username']
+            id = event['id']
+            sender = event['sender']
+            chat = event['chat']
+            sender_name = event['sender_name']
             timestamp = event['timestamp']
-            await self.send_json({'text': text, 'user_id': user_id, 'username': username, 'timestamp': timestamp})
+            await self.send_json({'id': id, 'text': text,'chat': chat, 'sender': sender, 'sender_name': sender_name, 'timestamp': timestamp})
         except Exception as e:
             await self.send_json({'error': str(e)})
 
@@ -76,7 +79,9 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     @database_sync_to_async
     def get_chat(self, user_id, room_id):
-        chat = Chat.objects.filter(user_id=user_id, room_id=room_id).first()
+        chat = Chat.objects.filter(participant_id=user_id, chatroom_id=room_id).first()
+        if not chat:
+            raise ValueError(f'Chat not found for user {user_id} in room {room_id}')
         return chat
 
 
@@ -84,11 +89,14 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     def save_message(self, text, chat):
         if not chat:
             raise ValueError(f'Chat {chat} does not exist')
-        serializer = MessageSerializer(data={'text': text, 'chat': chat.id})
+        serializer = MessageSerializer(data={'text': text, 'chat': chat.id, 'sender': self.scope.get('user')}, context={'request': self.scope})
         if serializer.is_valid():
             saved_message = serializer.save()
             return {
                 'id': saved_message.id,
+                'chat': saved_message.chat.id,
+                'sender': saved_message.sender.id,
+                'sender_name': saved_message.sender.username,
                 'text': saved_message.text,
                 'timestamp': saved_message.timestamp.isoformat(),
             }
@@ -98,6 +106,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     def check_room_exists(self, room_id):
         return ChatRoom.objects.filter(id=room_id).exists()
 
+
     @database_sync_to_async
     def check_chat_participants(self, user_id, room_id):
-        return Chat.objects.filter(user=user_id, room=room_id).exists()
+        return Chat.objects.filter(participant_id=user_id, chatroom_id=room_id).exists()

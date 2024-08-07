@@ -17,14 +17,17 @@ django_asgi_app = get_asgi_application()
 
 from channels.auth import AuthMiddlewareStack
 from chat.middleware import TokenAuthMiddleware
+from channels.security.websocket import AllowedHostsOriginValidator
 from channels.routing import ProtocolTypeRouter, URLRouter
 import chat.routing
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
-    "websocket": TokenAuthMiddleware(
-        URLRouter(
-            chat.routing.websocket_urlpatterns
+    "websocket": AllowedHostsOriginValidator(
+        TokenAuthMiddleware(
+            URLRouter(
+                chat.routing.websocket_urlpatterns
+            )
         )
-    )
+    ),
 })

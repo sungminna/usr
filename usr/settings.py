@@ -172,8 +172,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '100/day'
+        'anon': '1000/day',
+        'user': '1000/day'
     }
 }
 
@@ -181,7 +181,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [(os.environ.get('REDIS_HOST', 'localhost'), 6379)]
+            "hosts": [("127.0.0.1", 6379)]
         }
     }
 }

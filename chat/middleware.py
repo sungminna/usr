@@ -13,14 +13,19 @@ class TokenAuthMiddleware(BaseMiddleware):
         self.firebase_auth = FirebaseAuthentication()
 
     async def __call__(self, scope, receive, send):
-        headers = dict(scope['headers'])
-        auth_header = headers.get(b'authorization', b'').decode()
-        if auth_header.startswith('Bearer '):
-            token = auth_header.split(' ')[1]
-            scope['user'] = await self.authenticate(token)
-        else:
-            scope['user'] = None
-        return await super().__call__(scope, receive, send)
+        try:
+            headers = dict(scope['headers'])
+            auth_header = headers.get(b'authorization', b'').decode()
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+                scope['user'] = await self.authenticate(token)
+            else:
+                token = scope['query_string'][6:].decode()
+                scope['user'] = await self.authenticate(token)
+            return await super().__call__(scope, receive, send)
+        except Exception as e:
+            scope['user'] = AnonymousUser()
+            return await super().__call__(scope, receive, send)
 
     @database_sync_to_async
     def authenticate(self, token):
@@ -35,6 +40,6 @@ class TokenAuthMiddleware(BaseMiddleware):
             return firebase_token.user
 
         except auth.InvalidIdTokenError:
-            return None
+            return AnonymousUser()
         except Exception as e:
-            return None
+            return AnonymousUser()

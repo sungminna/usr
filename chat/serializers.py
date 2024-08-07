@@ -20,9 +20,23 @@ class ChatSerializer(serializers.HyperlinkedModelSerializer):
         read_only_fields = ('id', 'participant', 'chatroom', 'timestamp')
 
 class MessageSerializer(serializers.HyperlinkedModelSerializer):
-    chat = serializers.PrimaryKeyRelatedField(read_only=True)
+    chat = serializers.PrimaryKeyRelatedField(queryset=Chat.objects.all())
     sender = serializers.PrimaryKeyRelatedField(read_only=True)
+    sender_name = serializers.SerializerMethodField()
     class Meta:
         model = Message
-        fields = ('id', 'chat', 'sender', 'text', 'timestamp')
-        read_only_fields = ('id', 'chat', 'sender', 'timestamp')
+        fields = ('id', 'chat', 'sender', 'sender_name', 'text', 'timestamp')
+        read_only_fields = ('id', 'sender', 'sender_name', 'timestamp')
+
+    def create(self, validated_data):
+        validated_data['sender'] = self.context['request'].get('user')
+        print(validated_data)
+        return super().create(validated_data)
+
+    def get_sender_name(self, obj):
+        return obj.sender.username if obj.sender else None
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['sender_name'] = self.get_sender_name(instance)
+        return representation
