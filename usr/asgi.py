@@ -11,15 +11,15 @@ import os
 
 from django.core.asgi import get_asgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'usr.settings')
-
-django_asgi_app = get_asgi_application()
-
-from channels.auth import AuthMiddlewareStack
 from chat.middleware import TokenAuthMiddleware
 from channels.security.websocket import AllowedHostsOriginValidator
 from channels.routing import ProtocolTypeRouter, URLRouter
 import chat.routing
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'usr.settings')
+
+django_asgi_app = get_asgi_application()
+
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,

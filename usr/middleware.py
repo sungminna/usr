@@ -3,7 +3,9 @@ from django.utils.deprecation import MiddlewareMixin
 
 logger = logging.getLogger('drf')
 
+
 class RequestLoggingMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
         logger.info(f"Received {request.method} request to {request.get_full_path()}")
 

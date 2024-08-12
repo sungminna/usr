@@ -7,13 +7,15 @@ from rest_framework.permissions import AllowAny
 from .models import FirebaseToken
 from .serializers import FirebaseTokenSerializer
 from firebase_admin import auth
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from .authentication import FirebaseAuthentication
 
 # Create your views here.
 
+
 class FirebaseTokenView(APIView):
     permission_classes = [AllowAny, ]
+
     def get_authenticators(self):
         if self.request.method in ['PUT', 'DELETE']:
             return [FirebaseAuthentication()]
@@ -64,7 +66,6 @@ class FirebaseTokenView(APIView):
             return self._create_or_update_token(user, firebase_uid, request)
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
 
     def delete(self, request):
         try:

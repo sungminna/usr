@@ -1,13 +1,12 @@
 from django.db import IntegrityError
 from rest_framework.exceptions import ValidationError
 
-from django.shortcuts import render
 from rest_framework import viewsets, status
 
 from chat.models import ChatRoom, Chat, Message
 from chat.serializers import ChatRoomSerializer, ChatSerializer, MessageSerializer
 from local.authentication import FirebaseAuthentication
-from local.permissions import IsParticipant, IsSenderOrReadOnly, IsParticipantOrReadOnly, IsOwnerOrReadOnly
+from local.permissions import IsSenderOrReadOnly, IsParticipantOrReadOnly, IsOwnerOrReadOnly
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 
 from rest_framework.response import Response
@@ -24,6 +23,7 @@ class StandardResultsSetPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+
 class ChatRoomViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
@@ -32,6 +32,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
 
 class ChatViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
@@ -63,13 +64,13 @@ class ChatViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             raise ValidationError({'error': 'already joined'})
 
+
 class MessageViewSet(viewsets.ModelViewSet):
     authentication_classes = [FirebaseAuthentication]
     permission_classes = [IsAuthenticated, IsSenderOrReadOnly]
     queryset = Message.objects.all()
     pagination_class = StandardResultsSetPagination
     serializer_class = MessageSerializer
-
 
     @action(detail=False, methods=['GET'])
     def room_messages(self, request, *args, **kwargs):
@@ -94,7 +95,6 @@ class MessageViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except:
             return Response({'error': 'error'}, status=status.HTTP_400_BAD_REQUEST)
-
 
     def perform_create(self, serializer):
         try:

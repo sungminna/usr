@@ -3,12 +3,14 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+
 class Forum(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField()
 
     class Meta:
         ordering = ['-id']
+
 
 class Topic(models.Model):
     title = models.CharField(max_length=100)
@@ -19,6 +21,7 @@ class Topic(models.Model):
     class Meta:
         ordering = ['-id']
 
+
 class Post(models.Model):
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -27,6 +30,7 @@ class Post(models.Model):
 
     class Meta:
         ordering = ['-id']
+
 
 class Comment(models.Model):
     content = models.TextField()

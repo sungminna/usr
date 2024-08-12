@@ -52,6 +52,7 @@ class ForumAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Forum.objects.count(), 0)
 
+
 class TopicAPITestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -100,6 +101,7 @@ class TopicAPITestCase(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Topic.objects.count(), 0)
+
 
 class PostAPITestCase(APITestCase):
     @classmethod
@@ -154,6 +156,7 @@ class PostAPITestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Post.objects.count(), 0)
 
+
 class CommentAPITestCase(APITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -173,13 +176,11 @@ class CommentAPITestCase(APITestCase):
         self.assertEqual(response.data['author'], self.user.pk)
         self.assertEqual(response.data['post'], self.post.pk)
 
-
     def test_get_comment_list(self):
         comment = Comment.objects.create(content='Test Content', author=self.user, post=self.post)
         url = reverse('comment-list')
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
 
     def test_get_comment_detail(self):
         comment = Comment.objects.create(content='Test Content', author=self.user, post=self.post)
@@ -206,4 +207,3 @@ class CommentAPITestCase(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(Comment.objects.count(), 0)
-

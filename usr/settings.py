@@ -28,8 +28,6 @@ DB_PASSWORD = env('DB_PASSWORD')
 DB_NAME = env('DB_NAME')
 DB_USER = env('DB_USER')
 
-
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
@@ -39,13 +37,6 @@ SECRET_KEY = 'django-insecure-ky&t_3rvv^04yo*)3-tu9%v9gy&6_67p14oct#7#3xjhy0dv5y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'localhost',
-]
 
 # Application definition
 
@@ -81,7 +72,7 @@ MIDDLEWARE = [
 
 
 CORS_ORIGIN_ALLOW_ALL = True
-#CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_CREDENTIALS = True
 
 
 ROOT_URLCONF = 'usr.urls'
@@ -89,8 +80,7 @@ ROOT_URLCONF = 'usr.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -162,11 +152,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-#firebase
+# firebase
 cred = credentials.Certificate('fb-test-e3fe6-firebase-adminsdk-6o4tc-384490677f.json')
 firebase_admin.initialize_app(cred)
 
-#AUTH_USER_MODEL = 'local.User'
+# AUTH_USER_MODEL = 'local.User'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

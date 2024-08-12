@@ -1,6 +1,6 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from chat.models import ChatRoom, Chat, Message
+from chat.models import ChatRoom, Chat
 from chat.serializers import MessageSerializer
 
 
@@ -33,7 +33,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         try:
             if hasattr(self, 'group_name'):
                 await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        except Exception as e:
+        except Exception:
             pass
 
     async def receive_json(self, content, **kwargs):
@@ -69,7 +69,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
             chat = event['chat']
             sender_name = event['sender_name']
             timestamp = event['timestamp']
-            await self.send_json({'id': id, 'text': text,'chat': chat, 'sender': sender, 'sender_name': sender_name, 'timestamp': timestamp})
+            await self.send_json({'id': id, 'text': text, 'chat': chat, 'sender': sender, 'sender_name': sender_name, 'timestamp': timestamp})
         except Exception as e:
             await self.send_json({'error': str(e)})
 
@@ -83,7 +83,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         if not chat:
             raise ValueError(f'Chat not found for user {user_id} in room {room_id}')
         return chat
-
 
     @database_sync_to_async
     def save_message(self, text, chat):
@@ -105,7 +104,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
     @database_sync_to_async
     def check_room_exists(self, room_id):
         return ChatRoom.objects.filter(id=room_id).exists()
-
 
     @database_sync_to_async
     def check_chat_participants(self, user_id, room_id):

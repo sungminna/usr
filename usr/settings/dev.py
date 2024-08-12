@@ -27,36 +27,16 @@ environ.Env.read_env(
 DB_PASSWORD = env('DB_PASSWORD')
 DB_NAME = env('DB_NAME')
 DB_USER = env('DB_USER')
-MY_SECRET_KEY = env('MY_SECRET_KEY')
-
-
-SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-SECURE_HSTS_SECONDS = 31536000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = MY_SECRET_KEY    # 'django-insecure-ky&t_3rvv^04yo*)3-tu9%v9gy&6_67p14oct#7#3xjhy0dv5y'
-
+SECRET_KEY = 'django-insecure-ky&t_3rvv^04yo*)3-tu9%v9gy&6_67p14oct#7#3xjhy0dv5y'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'localhost',
-    'https://sungminna.com',
-]
 
 # Application definition
 
@@ -90,14 +70,9 @@ MIDDLEWARE = [
     'usr.middleware.RequestLoggingMiddleware',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:8000',
-    'http://localhost:8000',
-    'http://127.0.0.1:3000',
-    'http://localhost:3000',
-    'https://sungminna.com',
-    'http://sungminna.com',
-]
+
+CORS_ORIGIN_ALLOW_ALL = True
+# CORS_ALLOW_CREDENTIALS = True
 
 
 ROOT_URLCONF = 'usr.urls'
@@ -160,7 +135,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Seoul'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 

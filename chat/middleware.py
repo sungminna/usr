@@ -1,5 +1,4 @@
 from channels.db import database_sync_to_async
-from django.contrib.auth import get_user_model
 from channels.middleware import BaseMiddleware
 from firebase_admin import auth
 from local.models import FirebaseToken
@@ -23,7 +22,7 @@ class TokenAuthMiddleware(BaseMiddleware):
                 token = scope['query_string'][6:].decode()
                 scope['user'] = await self.authenticate(token)
             return await super().__call__(scope, receive, send)
-        except Exception as e:
+        except Exception:
             scope['user'] = AnonymousUser()
             return await super().__call__(scope, receive, send)
 
@@ -41,5 +40,5 @@ class TokenAuthMiddleware(BaseMiddleware):
 
         except auth.InvalidIdTokenError:
             return AnonymousUser()
-        except Exception as e:
+        except Exception:
             return AnonymousUser()

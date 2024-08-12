@@ -5,6 +5,7 @@ from .models import FirebaseToken
 
 User = get_user_model()
 
+
 class FirebaseAuthentication(authentication.BaseAuthentication):
     def authenticate(self, request):
         try:
@@ -13,8 +14,8 @@ class FirebaseAuthentication(authentication.BaseAuthentication):
                 return None
             token = auth_header.split(' ').pop()
             if token == 'undefined':
-                #server component returns 'undefined' string as token
-                #subject to change by frontend code
+                # server component returns 'undefined' string as token
+                # subject to change by frontend code
                 return None
             decoded_token = auth.verify_id_token(token)
             firebase_uid = decoded_token['uid']

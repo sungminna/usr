@@ -1,11 +1,10 @@
-from django.test import TestCase
 from rest_framework.test import APITestCase
-from rest_framework import status, permissions
+from rest_framework import status
 from django.contrib.auth.models import User
-from .models import FirebaseToken
 from django.urls import reverse
 
 # Create your tests here.
+
 
 class FirebaseTokenViewTestCase(APITestCase):
     @classmethod
@@ -20,7 +19,7 @@ class FirebaseTokenViewTestCase(APITestCase):
     def test_post_valid_token(self):
         url = reverse('firebase-token-list')
         data = {'token': self.token_str, 'username': self.username}
-        #self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
+        # self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
         self.client.force_authenticate(user=self.user)
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -28,13 +27,11 @@ class FirebaseTokenViewTestCase(APITestCase):
         self.assertEqual(response.data['firebase_uid'], self.firebase_uid)
         self.assertEqual(response.data['is_active'], True)
 
-
     def test_delete_valid_token(self):
         url = reverse('firebase-token-list')
         data = {'token': self.token_str, 'username': self.username}
         response = self.client.post(url, data, format='json')
-        #self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
+        # self.client.credentials(HTTP_AUTHORIZATION=f'{token}')
         self.client.force_authenticate(user=self.user)
         response = self.client.delete(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-
