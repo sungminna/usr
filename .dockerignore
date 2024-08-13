@@ -49,3 +49,6 @@ Dockerfile
 *.tmp
 *.bak
 *.backup
+
+selfsigned.crt
+selfsigned.key

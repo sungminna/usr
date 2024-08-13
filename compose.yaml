@@ -7,21 +7,24 @@ services:
       - "6379:6379"
 
   web:
-    build: .
+    image: "sungmin330/usr:version1.0.2"
     command: gunicorn usr.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/code
+      - static_volume:/code/static
     expose:
       - "8000"
     depends_on:
       - redis
     environment:
+      - DJANGO_ENV=prod
+      - ALLOWED_HOSTS=sungminna.com,www.sungminna.com
       - DEBUG=FALSE
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - MY_SECRET_KEY=${MY_SECRET_KEY}
-      - DB_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - DB_ROOT_PASSWORD=${DB_ADMIN_PASSWORD}
 
   nginx:
     image: nginx:latest
@@ -34,6 +37,3 @@ services:
       - ./selfsigned.key:/etc/nginx/ssl/selfsigned.key
     depends_on:
       - web
-
-volumes:
-  mysql_data:

@@ -75,3 +75,6 @@ ENV/
 
 # pyenv
 .python-version
+
+selfsigned.crt
+selfsigned.key
