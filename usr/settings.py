@@ -129,7 +129,7 @@ DATABASES = {
         'NAME': DB_NAME,
         'USER': DB_USER,
         'PASSWORD': DB_PASSWORD,
-        'HOST': '127.0.0.1',
+        'HOST': 'host.docker.internal',
         'PORT': '3306',
     }
 }
@@ -214,7 +214,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [("127.0.0.1", 6379)]
+            "hosts": [("redis", 6379)]
         }
     }
 }
