@@ -71,22 +71,22 @@ class UserViewSet(viewsets.ViewSet):
 
 
 class GroupViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
 
 
 class ForumViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Forum.objects.all()
     serializer_class = ForumSerializer
 
 
 class TopicViewSet(viewsets.ModelViewSet):
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [FirebaseAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Topic.objects.all()
     serializer_class = TopicSerializer
     filter_backends = [DjangoFilterBackend]

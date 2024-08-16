@@ -30,12 +30,16 @@ class FirebaseTokenView(APIView):
             return Response({'message': 'Token is invalid'}, status=status.HTTP_401_UNAUTHORIZED)
 
     def _get_or_create_user(self, username, email):
-        user, created = User.objects.get_or_create(username=username, email=email)
-        if created:
-            user.set_unusable_password()
-            user.save()
-        return user
 
+        is_user_exists = User.objects.filter(email=email).exists()
+        if not is_user_exists:
+            user, created = User.objects.get_or_create(username=username, email=email)
+            if created:
+                user.set_unusable_password()
+                user.save()
+                return user
+        else:
+            return None
     def _create_or_update_token(self, user, firebase_uid, request=None):
         data = {
             'user': user.pk,
@@ -63,7 +67,10 @@ class FirebaseTokenView(APIView):
             email = decoded_token.get('email')
             username = request.data.get('username')
             user = self._get_or_create_user(username, email)
-            return self._create_or_update_token(user, firebase_uid, request)
+            if user != None:
+                return self._create_or_update_token(user, firebase_uid, request)
+            else:
+                return Response({'message': 'Email already exists'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'message': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

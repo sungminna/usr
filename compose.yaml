@@ -29,6 +29,22 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - MY_SECRET_KEY=${MY_SECRET_KEY}
       - DB_ROOT_PASSWORD=${DB_ADMIN_PASSWORD}
+  nextjs:
+    image: "sungmin330/fb-app:version1.0.2"
+    expose:
+      - "3000"
+    networks:
+      - app_network
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - API_KEY=${NEXT_PUBLIC_API_KEY}
+      - AUTH_DOMAIN=${NEXT_PUBLIC_AUTH_DOMAIN}
+      - PROJECT_ID=${NEXT_PUBLIC_PROJECT_ID}
+      - STORAGE_BUCKET=${NEXT_PUBLIC_STORAGE_BUCKET}
+      - MESSAGING_SENDER_ID=${NEXT_PUBLIC_MESSAGING_SENDER_ID}
+      - APP_ID=${NEXT_PUBLIC_APP_ID}
+      - MEASUREMENT_ID=${NEXT_PUBLIC_MEASUREMENT_ID}
 
   nginx:
     image: nginx:latest
@@ -42,6 +58,7 @@ services:
       - static_volume:/usr/share/nginx/html/static
     depends_on:
       - web
+      - nextjs
     networks:
       - app_network
 volumes:
